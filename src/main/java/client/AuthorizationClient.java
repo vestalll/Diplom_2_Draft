@@ -42,11 +42,11 @@ public class AuthorizationClient extends StellarBurgersRestClient {
     public ValidatableResponse updateUser(UserToken userToken, User user) {
         return given()
                 .spec(getBaseSpec())
-                .header("Authorization", userToken)
+                .header("Authorization", userToken.getToken())
                 .body(user)
                 .when()
                 .patch(USER_PATH)
-                .then();
+                .then().log().body();
     }
 
     @Step("Удаление пользователя")
@@ -54,10 +54,10 @@ public class AuthorizationClient extends StellarBurgersRestClient {
         return given()
                 //   .auth().oauth2(userToken.getToken())
                 .spec(getBaseSpec())
-                .header("Authorization", userToken)
+                .header("Authorization", userToken.getToken())
                 .when()
                 .delete(USER_PATH)
-                .then();
+                .then().log().body();
     }
 
 }

@@ -36,11 +36,8 @@ public class EditUserTest {
         String token = loginResponse.extract().path("accessToken");
         System.out.println(token);
         UserToken userToken = new UserToken(token);
-        String updatedEmail = "email@mail.com";
-        String updatedPassword = "qwerty";
-        String updatedName = "lucky";
-        User user = new User(updatedEmail, updatedPassword, updatedName);
-        ValidatableResponse updateResponse = authorizationClient.updateUser(userToken, user);
+        User updatedUser = UserGenerator.getRandom();
+        ValidatableResponse updateResponse = authorizationClient.updateUser(userToken, updatedUser);
         statusCode = updateResponse.extract().statusCode();
         System.out.println("name: " + user.getName() + " email: " + user.getEmail() + " password: " + user.getPassword());
         assertThat(statusCode, equalTo(SC_OK));
