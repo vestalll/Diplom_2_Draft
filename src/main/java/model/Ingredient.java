@@ -8,7 +8,8 @@ public class Ingredient {
         this.hash = hash;
     }
 
-    public Ingredient() {}
+    public Ingredient() {
+    }
 
     public String getHash() {
         return hash;

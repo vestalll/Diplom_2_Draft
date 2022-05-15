@@ -1,3 +1,4 @@
+import client.OrderClient;
 import client.UserClient;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
@@ -13,40 +14,41 @@ import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-public class UpdateUserTest {
+public class GetUserOrdersTest {
     UserClient userClient;
     User user;
     UserCredentials userCredentials;
+    OrderClient orderClient;
 
     int statusCode;
-
 
     @Before
     public void setUp() {
         userClient = new UserClient();
+        orderClient = new OrderClient();
         user = UserGenerator.getRandom();
         userCredentials = new UserCredentials(user.getEmail(), user.getPassword());
     }
 
     @Test
-    @DisplayName("Изменение данных пользователя с авторизацией")
-    public void userDataUpdatingWithAuthorization() {
+    @DisplayName("Получение заказов пользователя")
+    public void userCreationWithValidCredentials() {
         userClient.createUser(user);
         ValidatableResponse loginResponse = userClient.loginUser(userCredentials);
         String token = loginResponse.extract().path("accessToken");
         UserToken userToken = new UserToken(token);
-        User updatedUser = UserGenerator.getRandom();
-        ValidatableResponse updateResponse = userClient.updateUser(userToken, updatedUser);
-        statusCode = updateResponse.extract().statusCode();
-        assertThat(statusCode, equalTo(SC_OK));
+        ValidatableResponse getResponse = orderClient.getUserOrder(userToken);
+        statusCode = getResponse.extract().statusCode();
+        assertThat("User isn't created", statusCode, equalTo(SC_OK));
     }
 
     @Test
-    @DisplayName("Изменение данных пользователя без авторизации")
-    public void userDataUpdatingWithoutAuthorization() {
-        User updatedUser = UserGenerator.getRandom();
-        ValidatableResponse updateResponse = userClient.updateUser(updatedUser);
-        statusCode = updateResponse.extract().statusCode();
-        assertThat(statusCode, equalTo(SC_UNAUTHORIZED));
+    @DisplayName("Получение заказов неавторизованного пользователя")
+    public void userCreationWithoutAuthorization() {
+        userClient.createUser(user);
+        ValidatableResponse getResponse = orderClient.getUserOrder();
+        statusCode = getResponse.extract().statusCode();
+        assertThat("Orders aren't got", statusCode, equalTo(SC_UNAUTHORIZED));
     }
+
 }

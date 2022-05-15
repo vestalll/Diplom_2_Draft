@@ -51,4 +51,21 @@ public class OrderClient extends StellarBurgersRestClient {
                 .get(ORDER_PATH)
                 .then().log().body();
     }
+
+    @Step("Попытка получения заказов неавторизованного пользователя")
+    public ValidatableResponse getUserOrder() {
+        return given()
+                .spec(getBaseSpec())
+                .when()
+                .get(ORDER_PATH)
+                .then().log().body();
+    }
+
+    public ValidatableResponse getOrders() {
+        return given()
+                .spec(getBaseSpec())
+                .when()
+                .get(ORDER_PATH + "/all")
+                .then();
+    }
 }

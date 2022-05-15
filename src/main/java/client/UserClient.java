@@ -6,7 +6,6 @@ import model.RefreshUserToken;
 import model.User;
 import model.UserCredentials;
 import model.UserToken;
-import org.apache.commons.lang3.builder.ToStringExclude;
 
 import static io.restassured.RestAssured.given;
 
@@ -17,8 +16,7 @@ public class UserClient extends StellarBurgersRestClient {
     private static final String USER_PATH = "api/auth/user";
 
 
-
-    @Step ("Создание пользователя")
+    @Step("Создание пользователя")
     public ValidatableResponse createUser(User user) {
         return given()
                 .spec(getBaseSpec())
@@ -28,7 +26,7 @@ public class UserClient extends StellarBurgersRestClient {
                 .then().log().body();
     }
 
-    @Step ("Логин пользователя")
+    @Step("Логин пользователя")
     public ValidatableResponse loginUser(UserCredentials userCredentials) {
         return given()
                 .spec(getBaseSpec())
@@ -39,7 +37,7 @@ public class UserClient extends StellarBurgersRestClient {
 
     }
 
-    @Step ("Изменение данных пользователя")
+    @Step("Изменение данных пользователя")
     public ValidatableResponse updateUser(UserToken userToken, User user) {
         return given()
                 .spec(getBaseSpec())
@@ -51,7 +49,18 @@ public class UserClient extends StellarBurgersRestClient {
     }
 
 
-    @Step ("Выход пользователя из системы")
+    @Step("Попытка изменения данных пользователя без авторизации")
+    public ValidatableResponse updateUser(User user) {
+        return given()
+                .spec(getBaseSpec())
+                .body(user)
+                .when()
+                .patch(USER_PATH)
+                .then().log().body();
+    }
+
+
+    @Step("Выход пользователя из системы")
     public ValidatableResponse logoutUser(UserToken userToken, RefreshUserToken refreshUserToken) {
         return given()
                 .spec(getBaseSpec())

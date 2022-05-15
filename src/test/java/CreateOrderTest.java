@@ -1,9 +1,11 @@
 import client.UserClient;
 import client.OrderClient;
+import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import model.*;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import utils.UserGenerator;
@@ -20,8 +22,6 @@ public class CreateOrderTest {
     User user;
     UserCredentials userCredentials;
     int statusCode;
-    int deleteStatusCode;
-    int logoutStatusCode;
     String messageText;
 
     @Before
@@ -31,25 +31,6 @@ public class CreateOrderTest {
         userCredentials = new UserCredentials(user.getEmail(), user.getPassword());
         orderClient = new OrderClient();
     }
-
-    @After
-    @DisplayName("Выход пользователя из системы")
-    public void tearDown() {
-        ValidatableResponse loginResponse = userClient.loginUser(userCredentials);
-        String accessToken = loginResponse.extract().path("accessToken");
-        String token = loginResponse.extract().path("refreshToken");
-        UserToken userToken = new UserToken(accessToken);
-        RefreshUserToken refreshUserToken = new RefreshUserToken(token);
-        ValidatableResponse logoutResponse = userClient.logoutUser(userToken,refreshUserToken);
-        logoutStatusCode = logoutResponse.extract().statusCode();
-        assertThat("User isn't logout", logoutStatusCode, equalTo(SC_OK));
-        //     String token = loginResponse.extract().path("accessToken");
-        //    UserToken userToken = new UserToken(token);
-        //    ValidatableResponse deleteResponse = userClient.deleteUser(userToken);
-        //    deleteStatusCode = deleteResponse.extract().statusCode();
-   //     assertThat("User isn't deleted", deleteStatusCode, equalTo(SC_ACCEPTED));
-    }
-
 
     @Test
     @DisplayName("Создание заказа с авторизацией")
@@ -62,21 +43,19 @@ public class CreateOrderTest {
         Order order = new Order(ingredients);
         ValidatableResponse createResponse = orderClient.createOrder(userToken, order);
         statusCode = createResponse.extract().statusCode();
-        assertThat(statusCode, equalTo(SC_OK));
-
+        assertThat("Order isn't created", statusCode, equalTo(SC_OK));
     }
 
     @Test
     @DisplayName("Создание заказа без авторизации")
+    @Description("Проверяется отсутствие номера пустого заказа в списке созданных заказов")
     public void orderCreationWithoutUserAuthorization() {
         List<String> ingredients = List.of("61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa70");
         Order order = new Order(ingredients);
         ValidatableResponse createResponse = orderClient.createOrder(order);
-//         statusCode = createResponse.extract().statusCode();
-        messageText = createResponse.extract().path("message");
-        //  assertThat(statusCode, equalTo(SC_UNAUTHORIZED));
-        System.out.println(messageText);
-        assertThat(messageText, equalTo("email or password are incorrect"));
+        List<Integer> orderNumbers = orderClient.getOrders().extract().response().path("orders.number");
+        Integer orderNumber = createResponse.extract().response().path("order.number");
+        Assert.assertFalse(orderNumbers.contains(orderNumber));
     }
 
     @Test
@@ -94,7 +73,7 @@ public class CreateOrderTest {
     }
 
     @Test
-    @DisplayName("Создание заказа с неверным хэшем ингрединетов")
+    @DisplayName("Создание заказа с неверным хэшем ингредиентов")
     public void orderCreationWithInvalidIngredientsHash() {
         userClient.createUser(user);
         ValidatableResponse loginResponse = userClient.loginUser(userCredentials);
