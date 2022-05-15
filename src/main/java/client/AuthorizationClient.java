@@ -24,7 +24,7 @@ public class AuthorizationClient extends StellarBurgersRestClient {
                 .body(user)
                 .when()
                 .post(REGISTRATION_PATH)
-                .then();
+                .then().log().body();
     }
 
     @Step ("Логин пользователя")
@@ -34,7 +34,7 @@ public class AuthorizationClient extends StellarBurgersRestClient {
                 .body(userCredentials)
                 .when()
                 .post(LOGIN_PATH)
-                .then();
+                .then().log().body();
 
     }
 
@@ -52,7 +52,6 @@ public class AuthorizationClient extends StellarBurgersRestClient {
     @Step("Удаление пользователя")
     public ValidatableResponse deleteUser(UserToken userToken) {
         return given()
-                //   .auth().oauth2(userToken.getToken())
                 .spec(getBaseSpec())
                 .header("Authorization", userToken.getToken())
                 .when()
