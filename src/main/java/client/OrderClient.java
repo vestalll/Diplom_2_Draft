@@ -3,7 +3,6 @@ package client;
 import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
 import model.Order;
-import model.UserCredentials;
 import model.UserToken;
 
 import static io.restassured.RestAssured.given;
@@ -17,6 +16,27 @@ public class OrderClient extends StellarBurgersRestClient {
                 .spec(getBaseSpec())
                 .header("Authorization", userToken.getToken())
                 .body(order)
+                .when()
+                .post(ORDER_PATH)
+                .then().log().body();
+    }
+
+    @Step("Попытка создания заказа без авторизации")
+    public ValidatableResponse createOrder(Order order) {
+        return given()
+                .spec(getBaseSpec())
+                .body(order)
+                .when()
+                .post(ORDER_PATH)
+                .then().log().body();
+    }
+
+
+    @Step("Попытка создания заказа без ингредиентов")
+    public ValidatableResponse createOrder(UserToken userToken) {
+        return given()
+                .spec(getBaseSpec())
+                .header("Authorization", userToken.getToken())
                 .when()
                 .post(ORDER_PATH)
                 .then().log().body();
