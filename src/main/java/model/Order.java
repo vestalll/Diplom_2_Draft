@@ -4,18 +4,20 @@ import java.util.List;
 
 public class Order {
 
-    List<Ingredient> ingredients;
+    List<String> ingredientHashes;
 
-    public Order(List<Ingredient> ingredients) {
-        this.ingredients = ingredients;
+    public Order(List<String> ingredientHashes) {
+        this.ingredientHashes = ingredientHashes;
     }
 
-    public List<Ingredient> getIngredients() {
-        return ingredients;
+    public Order() {}
+
+    public List<String> getIngredientHashes() {
+        return ingredientHashes;
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
-        this.ingredients = ingredients;
+    public void setIngredientHashes(List<String> ingredientHashes) {
+        this.ingredientHashes = ingredientHashes;
     }
 
 

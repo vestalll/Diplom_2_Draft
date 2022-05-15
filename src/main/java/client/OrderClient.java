@@ -21,4 +21,14 @@ public class OrderClient extends StellarBurgersRestClient {
                 .post(ORDER_PATH)
                 .then().log().body();
     }
+
+    @Step("Получение заказов пользователя")
+    public ValidatableResponse getUserOrder(UserToken userToken) {
+        return given()
+                .spec(getBaseSpec())
+                .header("Authorization", userToken.getToken())
+                .when()
+                .get(ORDER_PATH)
+                .then().log().body();
+    }
 }

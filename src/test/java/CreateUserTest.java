@@ -1,12 +1,10 @@
-import client.AuthorizationClient;
+import client.UserClient;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import model.User;
 import model.UserCredentials;
 import model.UserToken;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import utils.UserGenerator;
 
@@ -15,7 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public class CreateUserTest {
-    AuthorizationClient authorizationClient;
+    UserClient userClient;
     User user;
     UserCredentials userCredentials;
 
@@ -26,7 +24,7 @@ public class CreateUserTest {
 
     @Before
     public void setUp() {
-        authorizationClient = new AuthorizationClient();
+        userClient = new UserClient();
         user = UserGenerator.getRandom();
         userCredentials = new UserCredentials(user.getEmail(), user.getPassword());
     }
@@ -44,7 +42,7 @@ public class CreateUserTest {
     @Test
     @DisplayName("Создание уникального пользователя с заполнением всех полей верными значениями")
     public void userCreationWithValidCredentials() {
-        ValidatableResponse createResponse = authorizationClient.createUser(user);
+        ValidatableResponse createResponse = userClient.createUser(user);
         statusCode = createResponse.extract().statusCode();
         System.out.println("name: " + user.getName() + " email: " + user.getEmail() + " password: " + user.getPassword());
         assertThat("User isn't created", statusCode, equalTo(SC_OK));
@@ -53,9 +51,9 @@ public class CreateUserTest {
     @Test
     @DisplayName("Создание пользователя с существующими значениями")
     public void userCreationWithExistedData() {
-        authorizationClient.createUser(user);
+        userClient.createUser(user);
         User existedUser = new User(user.getEmail(), user.getPassword(), user.getName());
-        ValidatableResponse createResponse = authorizationClient.createUser(existedUser);
+        ValidatableResponse createResponse = userClient.createUser(existedUser);
         statusCode = createResponse.extract().statusCode();
         messageText = createResponse.extract().path("message");
         System.out.println("name: " + user.getName() + " email: " + user.getEmail() + " password: " + user.getPassword());
@@ -70,7 +68,7 @@ public class CreateUserTest {
     @DisplayName("Создание пользователя с пустым значением поля \"email\"")
     public void userCreationWithEmptyEmailField() {
         user.setEmail("");
-        ValidatableResponse createResponse = authorizationClient.createUser(user);
+        ValidatableResponse createResponse = userClient.createUser(user);
         statusCode = createResponse.extract().statusCode();
         messageText = createResponse.extract().path("message");
         System.out.println("name: " + user.getName() + " email: " + user.getEmail());
@@ -83,7 +81,7 @@ public class CreateUserTest {
     @DisplayName("Создание пользователя с пустым значением поля \"password\"")
     public void userCreationWithEmptyPasswordField() {
         user.setPassword("");
-        ValidatableResponse createResponse = authorizationClient.createUser(user);
+        ValidatableResponse createResponse = userClient.createUser(user);
         statusCode = createResponse.extract().statusCode();
         messageText = createResponse.extract().path("message");
         System.out.println("name: " + user.getName() + " email: " + user.getEmail() + " password: " + user.getPassword());
@@ -94,13 +92,13 @@ public class CreateUserTest {
     @Test
     @DisplayName("Удаление пользователя")
     public void userDeleting() {
-        authorizationClient.createUser(user);
+        userClient.createUser(user);
         System.out.println(user.getEmail() + "   " + user.getPassword() + "   " + user.getName());
-        ValidatableResponse loginResponse = authorizationClient.loginUser(userCredentials);
+        ValidatableResponse loginResponse = userClient.loginUser(userCredentials);
         String token = loginResponse.extract().path("accessToken");
         System.out.println(token);
         UserToken userToken = new UserToken(token);
-        ValidatableResponse deleteResponse = authorizationClient.deleteUser(userToken);
+        ValidatableResponse deleteResponse = userClient.deleteUser(userToken);
         statusCode = deleteResponse.extract().statusCode();
         assertThat("User isn't deleted", statusCode, equalTo(SC_ACCEPTED));
     }

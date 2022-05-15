@@ -1,4 +1,4 @@
-import client.AuthorizationClient;
+import client.UserClient;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import model.User;
@@ -13,7 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public class UpdateUserTest {
-    AuthorizationClient authorizationClient;
+    UserClient userClient;
     User user;
     UserCredentials userCredentials;
 
@@ -22,7 +22,7 @@ public class UpdateUserTest {
 
     @Before
     public void setUp() {
-        authorizationClient = new AuthorizationClient();
+        userClient = new UserClient();
         user = UserGenerator.getRandom();
         userCredentials = new UserCredentials(user.getEmail(), user.getPassword());
     }
@@ -30,12 +30,12 @@ public class UpdateUserTest {
     @Test
     @DisplayName("Изменение данных пользователя с авторизацией")
     public void userDataUpdatingWithAuthorization() {
-        authorizationClient.createUser(user);
-        ValidatableResponse loginResponse = authorizationClient.loginUser(userCredentials);
+        userClient.createUser(user);
+        ValidatableResponse loginResponse = userClient.loginUser(userCredentials);
         String token = loginResponse.extract().path("accessToken");
         UserToken userToken = new UserToken(token);
         User updatedUser = UserGenerator.getRandom();
-        ValidatableResponse updateResponse = authorizationClient.updateUser(userToken, updatedUser);
+        ValidatableResponse updateResponse = userClient.updateUser(userToken, updatedUser);
         statusCode = updateResponse.extract().statusCode();
         assertThat(statusCode, equalTo(SC_OK));
     }
@@ -43,11 +43,11 @@ public class UpdateUserTest {
     @Test
     @DisplayName("Изменение данных пользователя без авторизации")
     public void userDataUpdatingWithoutAuthorization() {
-        ValidatableResponse createResponse = authorizationClient.createUser(user);
+        ValidatableResponse createResponse = userClient.createUser(user);
         String token = createResponse.extract().path("accessToken");
         UserToken userToken = new UserToken(token);
         User updatedUser = UserGenerator.getRandom();
-        ValidatableResponse updateResponse = authorizationClient.updateUser(userToken, updatedUser);
+        ValidatableResponse updateResponse = userClient.updateUser(userToken, updatedUser);
         statusCode = updateResponse.extract().statusCode();
         assertThat(statusCode, equalTo(SC_OK));
     }
