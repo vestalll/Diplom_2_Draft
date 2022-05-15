@@ -1,8 +1,10 @@
+import client.OrderClient;
 import client.UserClient;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import model.User;
 import model.UserCredentials;
+import model.UserToken;
 import org.junit.Before;
 import org.junit.Test;
 import utils.UserGenerator;
@@ -15,14 +17,14 @@ public class GetUserOrders {
     UserClient userClient;
     User user;
     UserCredentials userCredentials;
+    OrderClient orderClient;
 
     int statusCode;
-    String accessToken;
-    String messageText;
 
     @Before
     public void setUp() {
         userClient = new UserClient();
+        orderClient = new OrderClient();
         user = UserGenerator.getRandom();
         userCredentials = new UserCredentials(user.getEmail(), user.getPassword());
     }
@@ -33,8 +35,9 @@ public class GetUserOrders {
         userClient.createUser(user);
         ValidatableResponse loginResponse = userClient.loginUser(userCredentials);
         String token = loginResponse.extract().path("accessToken");
-        statusCode = loginResponse.extract().statusCode();
-     //   ValidatableResponse getResponse = orderClient.getUserOrder(token);
+        UserToken userToken = new UserToken(token);
+        ValidatableResponse getResponse = orderClient.getUserOrder(userToken);
+        statusCode = getResponse.extract().statusCode();
         assertThat("User isn't created", statusCode, equalTo(SC_OK));
     }
 

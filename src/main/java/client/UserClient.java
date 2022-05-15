@@ -2,6 +2,7 @@ package client;
 
 import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
+import model.RefreshUserToken;
 import model.User;
 import model.UserCredentials;
 import model.UserToken;
@@ -46,6 +47,18 @@ public class UserClient extends StellarBurgersRestClient {
                 .body(user)
                 .when()
                 .patch(USER_PATH)
+                .then().log().body();
+    }
+
+
+    @Step ("Выход пользователя из системы")
+    public ValidatableResponse logoutUser(UserToken userToken, RefreshUserToken refreshUserToken) {
+        return given()
+                .spec(getBaseSpec())
+                .header("Authorization", userToken.getToken())
+                .body(refreshUserToken)
+                .when()
+                .post(LOGOUT_PATH)
                 .then().log().body();
     }
 
